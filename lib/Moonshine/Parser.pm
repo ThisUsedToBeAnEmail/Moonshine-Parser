@@ -60,8 +60,9 @@ Perhaps a little code snippet.
 
 =cut
 sub start {
-    my ( $self, $tag, $attr ) = @_;
-
+    my ( $self, $tag, $attr) = @_;
+    my $closed = delete $attr->{'/'};
+    
     $attr->{tag} = lc $tag;
     my $element;
     if ( my $current_element = $self->_current_element ) {
@@ -80,7 +81,8 @@ sub start {
             $self->{base_element} = $element;
         }
     }
-    push @{ $self->{elements} }, $element;
+    push @{ $self->{elements} }, $element
+        unless $closed;
 }
 
 =head2 text
