@@ -61,4 +61,29 @@ moon_test(
     ],
 );
 
+moon_test(
+    name => 'one level',
+    build => {
+        class => 'Moonshine::Parser',
+    },
+    instructions => [
+        {
+            test => 'obj',
+            func => 'parse_file',
+            args => [
+                't/html/embedded.html',
+            ],
+            args_list => 1,
+            expected => 'Moonshine::Element',
+            subtest => [
+                {
+                    test => 'render',
+                    expected => '<html><head><title>A HTML standard template</title><meta charset="utf-8"></meta></head><body><table class="two-columns" id="table-1"><tr><th class="month">Description</th><th class="savings">Facts</th></tr><tr class="two-column-odd" id="row-1"><td id="title">Some Description Some Description Some Description Some Description</td><td class="facts">This text <small>small text</small> More text</td></tr></table></body></html>',
+                },
+            ]
+        }
+    ],
+);
+
+
 sunrise();

@@ -62,8 +62,10 @@ Perhaps a little code snippet.
 sub start {
     my ( $self, $tag, $attr) = @_;
     my $closed = delete $attr->{'/'};
-    
+   
     $attr->{tag} = lc $tag;
+    $attr->{data} = [ ];
+    
     my $element;
     if ( my $current_element = $self->_current_element ) {
         $element = $current_element->add_child($attr);
@@ -94,6 +96,13 @@ sub text {
     if ( $text =~ m{\S+}xms ) {
         my $element = $self->_current_element;
         $text =~ s{^\s+|\s+$}{}g;
+        
+        if ($element->has_children) {
+            my $data = $element->children;
+            $element->children([]);
+            for ( @{ $data } ) { $element->data($_) }
+        }
+        
         $element->data($text);
     }
 }
