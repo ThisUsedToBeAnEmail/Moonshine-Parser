@@ -4,9 +4,13 @@ use 5.006;
 use strict;
 use warnings;
 
+use base qw/HTML::Parser/;
+
+use Moonshine::Element;
+
 =head1 NAME
 
-Moonshine::Parser - The great new Moonshine::Parser!
+Moonshine::Parser
 
 =head1 VERSION
 
@@ -16,6 +20,33 @@ Version 0.01
 
 our $VERSION = '0.01';
 
+sub new {
+    my $class = shift;
+    my $self  = bless {
+        base_element => undef,
+        elements     => [],
+        closed       => [],
+    }, $class;
+    $self->SUPER::init(@_);
+}
+
+sub parse {
+    my ( $self, $data ) = @_;
+
+    $self->_cleared;
+    $self->SUPER::parse($data);
+
+    return $self->{base_element};
+}
+
+sub parse {
+    my ( $self, $data ) = @_;
+
+    $self->_cleared;
+    $self->SUPER::parse($data);
+
+    return $self->{base_element};
+}
 
 =head1 SYNOPSIS
 
@@ -25,42 +56,82 @@ Perhaps a little code snippet.
 
     use Moonshine::Parser;
 
-    my $foo = Moonshine::Parser->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+    my $parser = Moonshine::Parser->new();
+    my $element = $parser->parse($html);
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 start
 
 =cut
 
-sub function1 {
+sub start {
+    my ( $self, $tag, $attr ) = @_;
+
+    $attr->{tag} = lc $tag;
+    my $element;
+    if ( my $current_element = $self->_current_element ) {
+        $element = $current_element->add_child($attr);
+    }
+    else {
+        $element = Moonshine::Element->new($attr);
+        if ( my $base_element = $self->{base_element} ) {
+            my $action = $self->_is_closed($base_element->{guid})
+                ? 'add_after_element'
+                : 'add_child';
+            $base_element->$action($element);
+        } else {
+            $self->{base_element} = $element 
+        }  
+    }
+    push @{ $self->{elements} }, $element;
 }
 
-=head2 function2
+=head2 text
 
 =cut
 
-sub function2 {
+sub text {
+    my ( $self, $text ) = @_;
+    my $element = $self->_current_element;
+    $element->data($text);
+}
+
+=head2 end
+
+=cut
+
+sub end {
+    my ( $self, $tag, $origtext ) = @_;
+    my $close = pop @{ $self->{elements} };
+    push @{ $self->{closed} }, $close->{guid};
+}
+
+sub _current_element {
+    return $_[0]->{elements}[ scalar @{ $_[0]->{elements} } - 1 ];
+}
+
+sub _is_closed {
+    return grep {
+        $_ =~ m/^$_[1]$/
+    } @{ $_[0]->{closed} };
+}
+
+sub _cleared {
+    $_[0]->{base_element} = undef;
+    $_[0]->{elements} = [];
+    $_[0]->{closed} = [];
 }
 
 =head1 AUTHOR
 
-LNATION, C<< <thisusedtobeanemail at gmail.com> >>
+Robert Acock, C<< <thisusedtobeanemail at gmail.com> >>
 
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-moonshine-parser at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Moonshine-Parser>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
@@ -91,13 +162,11 @@ L<http://search.cpan.org/dist/Moonshine-Parser/>
 
 =back
 
-
 =head1 ACKNOWLEDGEMENTS
-
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2017 LNATION.
+Copyright 2017 Robert Acock.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0). You may obtain a
@@ -138,4 +207,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Moonshine::Parser
+1;    # End of Moonshine::Parser
