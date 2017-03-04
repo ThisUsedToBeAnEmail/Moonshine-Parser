@@ -1,6 +1,5 @@
 package Moonshine::Parser;
 
-use 5.006;
 use strict;
 use warnings;
 
@@ -10,7 +9,7 @@ use Moonshine::Element;
 
 =head1 NAME
 
-Moonshine::Parser
+Moonshine::Parser - Parsed 
 
 =head1 VERSION
 
@@ -27,6 +26,21 @@ sub new {
     $self->SUPER::init(@_);
 }
 
+=head1 SYNOPSIS
+
+    use Moonshine::Parser;
+
+    my $parser = Moonshine::Parser->new();
+    my $moonshine_element = $parser->parse($html);
+
+=head1 SUBROUTINES/METHODS
+
+=head2 parse
+
+Parse a html string into a Moonshine::Element.
+
+=cut
+
 sub parse {
     my ( $self, $data ) = @_;
 
@@ -34,6 +48,12 @@ sub parse {
 
     return $self->{base_element};
 }
+
+=head2 parse_file
+
+Parse a file into a Moonshine::Element.
+
+=cut
 
 sub parse_file {
     my ( $self, $file ) = @_;
@@ -43,22 +63,6 @@ sub parse_file {
     return $self->{base_element};
 }
 
-=head1 SYNOPSIS
-
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
-    use Moonshine::Parser;
-
-    my $parser = Moonshine::Parser->new();
-    my $element = $parser->parse($html);
-
-=head1 SUBROUTINES/METHODS
-
-=head2 start
-
-=cut
 sub start {
     my ( $self, $tag, $attr) = @_;
     my $closed = delete $attr->{'/'};
@@ -87,10 +91,6 @@ sub start {
         unless $closed;
 }
 
-=head2 text
-
-=cut
-
 sub text {
     my ( $self, $text ) = @_;
     if ( $text =~ m{\S+}xms ) {
@@ -106,10 +106,6 @@ sub text {
         $element->data($text);
     }
 }
-
-=head2 end
-
-=cut
 
 sub end {
     my ( $self, $tag, $origtext ) = @_;

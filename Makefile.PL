@@ -2,10 +2,11 @@ use 5.006;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
+use Module::Metadata;
 
 WriteMakefile(
     NAME             => 'Moonshine::Parser',
-    AUTHOR           => q{LNATION <thisusedtobeanemail@gmail.com>},
+    AUTHOR           => q{Robert Acock <thisusedtobeanemail@gmail.com>},
     VERSION_FROM     => 'lib/Moonshine/Parser.pm',
     ABSTRACT_FROM    => 'lib/Moonshine/Parser.pm',
     LICENSE          => 'artistic_2',
@@ -16,11 +17,25 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More' => 0,
+        'Moonshine::Test' => 0.10,
     },
     PREREQ_PM => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'Moonshine::Element' => 0.08,
+        'HTML::Parser' => '3.72',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Moonshine-Parser-*' },
+    META_MERGE => {
+        'meta-spec' => { version => 2 },
+        resources => {
+            repository => {
+                type => 'git',
+                url  => 'https://github.com/ThisUsedToBeAnEmail/Moonshine-Parser.git',
+                web  => 'https://github.com/ThisUsedToBeAnEmail/Moonshine-Parser',
+            },
+        },
+    },
+    META_ADD => {
+        provides => Module::Metadata->provides(version => '2', dir => 'lib'),
+    }, 
 );
