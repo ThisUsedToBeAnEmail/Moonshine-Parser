@@ -2,11 +2,11 @@ use Moonshine::Test qw/:all/;
 
 use Moonshine::Parser;
 
-my $parser = Moonshine::Parser->new;
-
 moon_test(
     name         => 'parse a basic tag',
-    instance     => $parser,
+    build => {
+        class => 'Moonshine::Parser',
+    },
     instructions => [
         {
             test => 'obj',
@@ -44,7 +44,9 @@ moon_test(
 
 moon_test(
     name         => 'parse two p tags inside a wrapper div',
-    instance     => $parser,
+    build => {
+        class => 'Moonshine::Parser',
+    },
     instructions => [
         {
             test => 'obj',
@@ -102,7 +104,9 @@ moon_test(
 
 moon_test(
     name         => 'parse two p tags no wrapper div',
-    instance     => $parser,
+    build => {
+        class => 'Moonshine::Parser',
+    },
     instructions => [
         {
             test => 'obj',

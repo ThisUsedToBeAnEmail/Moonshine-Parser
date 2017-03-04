@@ -22,28 +22,23 @@ our $VERSION = '0.01';
 
 sub new {
     my $class = shift;
-    my $self  = bless {
-        base_element => undef,
-        elements     => [],
-        closed       => [],
-    }, $class;
+    my $self  = bless {}, $class;
+    $self->_set_up;
     $self->SUPER::init(@_);
 }
 
 sub parse {
     my ( $self, $data ) = @_;
 
-    $self->_cleared;
     $self->SUPER::parse($data);
 
     return $self->{base_element};
 }
 
-sub parse {
-    my ( $self, $data ) = @_;
+sub parse_file {
+    my ( $self, $file ) = @_;
 
-    $self->_cleared;
-    $self->SUPER::parse($data);
+    $self->SUPER::parse_file($file);
 
     return $self->{base_element};
 }
@@ -64,7 +59,6 @@ Perhaps a little code snippet.
 =head2 start
 
 =cut
-
 sub start {
     my ( $self, $tag, $attr ) = @_;
 
@@ -76,13 +70,15 @@ sub start {
     else {
         $element = Moonshine::Element->new($attr);
         if ( my $base_element = $self->{base_element} ) {
-            my $action = $self->_is_closed($base_element->{guid})
-                ? 'add_after_element'
-                : 'add_child';
+            my $action =
+              $self->_is_closed( $base_element->{guid} )
+              ? 'add_after_element'
+              : 'add_child';
             $base_element->$action($element);
-        } else {
-            $self->{base_element} = $element 
-        }  
+        }
+        else {
+            $self->{base_element} = $element;
+        }
     }
     push @{ $self->{elements} }, $element;
 }
@@ -93,8 +89,11 @@ sub start {
 
 sub text {
     my ( $self, $text ) = @_;
-    my $element = $self->_current_element;
-    $element->data($text);
+    if ( $text =~ m{\S+}xms ) {
+        my $element = $self->_current_element;
+        $text =~ s{^\s+|\s+$}{}g;
+        $element->data($text);
+    }
 }
 
 =head2 end
@@ -108,19 +107,18 @@ sub end {
 }
 
 sub _current_element {
-    return $_[0]->{elements}[ scalar @{ $_[0]->{elements} } - 1 ];
+    my $count = scalar @{ $_[0]->{elements} };
+    return $_[0]->{elements}[ $count - 1 ];
 }
 
 sub _is_closed {
-    return grep {
-        $_ =~ m/^$_[1]$/
-    } @{ $_[0]->{closed} };
+    return grep { $_ =~ m/^$_[1]$/ } @{ $_[0]->{closed} };
 }
 
-sub _cleared {
+sub _set_up {
     $_[0]->{base_element} = undef;
-    $_[0]->{elements} = [];
-    $_[0]->{closed} = [];
+    $_[0]->{elements}     = [];
+    $_[0]->{closed}       = [];
 }
 
 =head1 AUTHOR
