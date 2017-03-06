@@ -17,10 +17,10 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More' => 0,
-        'Moonshine::Test' => 0.10,
+        'Moonshine::Test' => 0.13,
     },
     PREREQ_PM => {
-        'Moonshine::Element' => 0.08,
+        'Moonshine::Element' => 0.09,
         'HTML::Parser' => '3.72',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

@@ -13,11 +13,11 @@ Moonshine::Parser - Parsed
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub new {
     my $class = shift;
@@ -37,7 +37,7 @@ sub new {
 
 =head2 parse
 
-Parse a html string into a Moonshine::Element.
+Parse html into a Moonshine::Element.
 
 =cut
 
@@ -51,7 +51,7 @@ sub parse {
 
 =head2 parse_file
 
-Parse a file into a Moonshine::Element.
+Parse a file that contains html into a Moonshine::Element.
 
 =cut
 
@@ -99,8 +99,8 @@ sub text {
         
         if ($element->has_children) {
             my $data = $element->children;
+            push @{ $element->{data} }, @{ $data };
             $element->children([]);
-            for ( @{ $data } ) { $element->data($_) }
         }
         
         $element->data($text);
@@ -207,7 +207,6 @@ YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
 CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 
 =cut
 
