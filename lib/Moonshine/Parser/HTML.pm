@@ -1,4 +1,4 @@
-package Moonshine::Parser;
+package Moonshine::Parser::HTML;
 
 use strict;
 use warnings;
@@ -9,66 +9,124 @@ use Moonshine::Element;
 
 =head1 NAME
 
-Moonshine::Parser - Parsed 
+Moonshine::Parser::HTML - Parse html into a Moonshine::Element. 
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
 our $VERSION = '0.02';
 
+sub new {
+    my $class = shift;
+    my $self  = bless {}, $class;
+    $self->_set_up;
+    $self->SUPER::init(@_);
+}
+
 =head1 SYNOPSIS
 
-    use Moonshine::Parser;
+    use Moonshine::Parser::HTML;
 
-    my $parser = Moonshine::Parser->new();
-    my $moonshine_element = $parser->parse('html', $html);
+    my $parser = Moonshine::Parser::HTML:->new();
+    my $moonshine_element = $parser->parse($html);
 
 =head1 SUBROUTINES/METHODS
 
 =head2 parse
 
-    $self->parse($type, $string);
-
 Parse html into a Moonshine::Element.
+
+=cut
+
+sub parse {
+    my ( $self, $data ) = @_;
+
+    $self->SUPER::parse($data);
+
+    return $self->{base_element};
+}
 
 =head2 parse_file
-    
-    $self->parse_file($type, $file);
-
-=cut
-
-=head2 parse_html
-
-    $self->parse_html($string);
-
-Parse html into a Moonshine::Element.
-
-=cut
-
-=head2 parse_html_file
-
-    $self->parse_html_file($file);
 
 Parse a file that contains html into a Moonshine::Element.
 
 =cut
 
-=head2 parse_pod
+sub parse_file {
+    my ( $self, $file ) = @_;
 
-    $self->parse_pod($string);
+    $self->SUPER::parse_file($file);
 
-Parse pod into a Moonshine::Element.
+    return $self->{base_element};
+}
 
-=cut
+sub start {
+    my ( $self, $tag, $attr) = @_;
+    my $closed = delete $attr->{'/'};
+   
+    $attr->{tag} = lc $tag;
+    $attr->{data} = [ ];
+    
+    my $element;
+    if ( my $current_element = $self->_current_element ) {
+        $element = $current_element->add_child($attr);
+    }
+    else {
+        $element = Moonshine::Element->new($attr);
+        if ( my $base_element = $self->{base_element} ) {
+            my $action =
+              $self->_is_closed( $base_element->{guid} )
+              ? 'add_after_element'
+              : 'add_child';
+            $base_element->$action($element);
+        }
+        else {
+            $self->{base_element} = $element;
+        }
+    }
+    push @{ $self->{elements} }, $element
+        unless $closed;
+}
 
-=head2 parse_pod_file
+sub text {
+    my ( $self, $text ) = @_;
+    if ( $text =~ m{\S+}xms ) {
+        my $element = $self->_current_element;
+        $text =~ s{^\s+|\s+$}{}g;
+        
+        if ($element->has_children) {
+            my $data = $element->children;
+            push @{ $element->{data} }, @{ $data };
+            $element->children([]);
+        }
+        
+        $element->data($text);
+    }
+}
 
-Parse a file that contains pod into a Moonshine::Element.
+sub end {
+    my ( $self, $tag, $origtext ) = @_;
+    my $close = pop @{ $self->{elements} };
+    push @{ $self->{closed} }, $close->{guid};
+}
 
-=cut
+sub _current_element {
+    my $count = scalar @{ $_[0]->{elements} };
+    return $_[0]->{elements}[ $count - 1 ];
+}
+
+sub _is_closed {
+    return grep { $_ =~ m/^$_[1]$/ } @{ $_[0]->{closed} };
+}
+
+sub _set_up {
+    $_[0]->{base_element} = undef;
+    $_[0]->{elements}     = [];
+    $_[0]->{closed}       = [];
+}
 
 =head1 AUTHOR
 

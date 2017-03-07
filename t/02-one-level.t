@@ -1,11 +1,11 @@
 use Moonshine::Test qw/:all/;
 
-use Moonshine::Parser;
+use Moonshine::Parser::HTML;
 
 moon_test(
     name => 'simple',
     build => {
-        class => 'Moonshine::Parser',
+        class => 'Moonshine::Parser::HTML',
     },
     instructions => [
         {
@@ -29,7 +29,7 @@ moon_test(
 moon_test(
     name => 'one level',
     build => {
-        class => 'Moonshine::Parser',
+        class => 'Moonshine::Parser::HTML',
     },
     instructions => [
         {
@@ -64,7 +64,7 @@ moon_test(
 moon_test(
     name => 'one level',
     build => {
-        class => 'Moonshine::Parser',
+        class => 'Moonshine::Parser::HTML',
     },
     instructions => [
         {

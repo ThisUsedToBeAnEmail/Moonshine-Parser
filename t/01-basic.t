@@ -1,11 +1,11 @@
 use Moonshine::Test qw/:all/;
 
-use Moonshine::Parser;
+use Moonshine::Parser::HTML;
 
 moon_test(
     name         => 'parse a basic tag',
     build => {
-        class => 'Moonshine::Parser',
+        class => 'Moonshine::Parser::HTML',
     },
     instructions => [
         {
@@ -45,7 +45,7 @@ moon_test(
 moon_test(
     name         => 'parse two p tags inside a wrapper div',
     build => {
-        class => 'Moonshine::Parser',
+        class => 'Moonshine::Parser::HTML',
     },
     instructions => [
         {
@@ -105,7 +105,7 @@ moon_test(
 moon_test(
     name         => 'parse two p tags no wrapper div',
     build => {
-        class => 'Moonshine::Parser',
+        class => 'Moonshine::Parser::HTML',
     },
     instructions => [
         {
